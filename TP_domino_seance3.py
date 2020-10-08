@@ -3,7 +3,7 @@
 """
 Created on Mon Sep 28 15:20:36 2020
 
-@author: Alice Krychowski et Aaron Ferguson 
+@author: Alice Krychowski et Aaron Fargeon 
 temps : 
 """
 
