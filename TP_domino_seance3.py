@@ -3,11 +3,8 @@
 """
 Created on Mon Sep 28 15:20:36 2020
 
-@author: Alice Krychowski
-Je n'étais pas là le jour du TP (j'étais dans la file d'attente pour effectuer un test PCR)
-Et je n'ai pas réussi à trouver un binome, donc j'ai fait le TP seule
-(des élèves m'ont dit que ce n'était pas obligatoire d'etre à deux).
-Je pense que j'y ai consacré environ 3h
+@author: Alice Krychowski et Aaron Ferguson 
+temps : 
 """
 
 import random as rd
