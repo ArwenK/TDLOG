@@ -6,6 +6,7 @@ Created on Fri Nov  6 15:33:56 2020
 @author: alicekrychowskimac
 """
 import datetime
+import json
 
 # On pourrait faire une dataclass
 class Ingredient:
@@ -56,6 +57,14 @@ class Ingredient:
         return string
 
     @property
+    def dict_ingredient(self):
+        """
+        Returns a dictionnary corresponding to the ingredient.
+        """
+        return {'Nom' : self.nom, 'Catégorie' : self.categorie, 'Quantité' : self.quantite}
+
+
+    @property
     def __eq__(self, other):
         """Returns True if self and other are equal"""
         return self.nom == other.nom and self.quantite == other.quantite
@@ -100,6 +109,18 @@ class Recette:
         Returns a string corresponding to the Python representation.
         """
         return "Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ")"
+
+    @property
+    def dict_recette(self):
+        """
+        Renvoie un dictionnaire correspondant à la recette.
+        """
+        liste_dict_ingredients = []
+        for ingredient in self.liste_ingredients:
+            liste_dict_ingredients.append(ingredient.dict_ingredient)
+        dicti = {'Nom' : self.__nom, 'Categorie' : self.__categorie,
+                 'Liste ingredients' : liste_dict_ingredients}
+        return dicti
 
     @property
     def __eq__(self, other):
@@ -157,7 +178,8 @@ class Recette:
 class Repas:
     """
     Represente un repas
-    - Nb_personnes de type int 
+    - Nb_personnes de type int
+      (la valeur 0 correspond à une valeur non précisée par l'utilisateur)
     - horaire (non implémenté)
     - une liste de recettes liste_recettes
     """
@@ -173,22 +195,23 @@ class Repas:
         """
         return "Repas"
 
-#    @property
-#    def __eq__(self, other):
-#        """Returns True if self and other are equal"""
-#        return self.__nom == other.get_nom
-#
-#    @property
-#    def __ne__(self, other):
-#        """Returns True if self and other are different"""
-#        return not self.__eq__(other)
+    @property
+    def dict_repas(self):
+        """
+        Renvoie un dictionnaire correspondant au repas.
+        """
+        liste_dict_recettes = []
+        for recette in self.liste_recettes:
+            liste_dict_recettes.append(recette.dict_recette)
+        dicti = {'Nombre de personnes' : self.nb_personnes, 'Liste recettes' : liste_dict_recettes}
+        return dicti
 
     @property
     def afficher_repas(self):
         """
         Affiche les recettes du repas
         """
-        print(self.__repr__ + " : ")
+        print("\n \n" + self.__repr__ + " : ")
         for recette in self.liste_recettes:
             print("")
             recette.afficher_recette
@@ -220,6 +243,13 @@ class Repas:
         self.liste_recettes.remove(recette)
         return None
 
+class RepasEncoder(json.JSONEncoder):
+    #code d'après https://docs.python.org/fr/2.7/library/json.html
+    def default(self, obj):
+        if isinstance(obj, Repas):
+            return obj.dict_repas
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
 
 if __name__ == "__main__":
 #    #Test of the class Ingredient
@@ -237,6 +267,12 @@ if __name__ == "__main__":
     repas = Repas()
     repas.ajouter_recette(R)
     repas.afficher_repas
+
+    with open("data_file.json", "w") as write_file:
+        json.dump(repas, write_file, indent=2, cls=RepasEncoder)
+    with open("data_file.json", "r") as data_file:
+        data = json.load(data_file)
+
     repas.supprimer_recette(R)
     repas.afficher_repas
     repas.set_nb_personnes(24)
