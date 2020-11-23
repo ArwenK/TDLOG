@@ -6,6 +6,7 @@ Created on Fri Nov  6 15:33:56 2020
 @author: alicekrychowskimac
 """
 import datetime
+# datetime(year, month, day, hour, minute, second, microsecond)
 import json
 
 # On pourrait faire une dataclass
@@ -175,41 +176,50 @@ class Recette:
         self.liste_ingredients.remove(ingredient)
         return None
 
+
 class Repas:
     """
     Represente un repas
     - Nb_personnes de type int
       (la valeur 0 correspond à une valeur non précisée par l'utilisateur)
-    - horaire (non implémenté)
+    - une date de type datetime
     - une liste de recettes liste_recettes
     """
 
     def __init__(self):
+        """
+        Initialise un repas au moment de sa création par l'utilisateur. 
+        Par défaut, le nombre de personne est 0, et la date est la date actuelle
+        """
         self.liste_recettes = []
         self.nb_personnes = 0
+        self.date = datetime.datetime.now()
+        # date actuelle
 
     @property
     def __repr__(self):
         """
         Returns a string corresponding to the Python representation.
         """
-        return "Repas"
+        return "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")
 
     @property
     def dict_repas(self):
         """
         Renvoie un dictionnaire correspondant au repas.
+        Utilisé pour le stockage dans un fichier JSON.
         """
         liste_dict_recettes = []
         for recette in self.liste_recettes:
             liste_dict_recettes.append(recette.dict_recette)
-        dicti = {'Nombre de personnes' : self.nb_personnes, 'Liste recettes' : liste_dict_recettes}
+        dicti = {'Nombre de personnes' : self.nb_personnes, 'Liste recettes' : liste_dict_recettes,
+                 'Date et heure' : self.date.isoformat()}
         return dicti
 
     @property
     def afficher_repas(self):
         """
-        Affiche les recettes du repas
+        Affiche les recettes du repas.
         """
         print("\n \n" + self.__repr__ + " : ")
         for recette in self.liste_recettes:
@@ -219,14 +229,24 @@ class Repas:
 
     #@nb_personnes.setter
     def set_nb_personnes(self, nombre):
-        """ Affecte ou modifie le nom de la recette"""
+        """ Affecte ou modifie le nombre de personnes associées au repas"""
         assert (isinstance(nombre, int)), "Le nombre de personnes n'est pas de type int"
         self.nb_personnes = nombre
         return None
 
+    def set_date(self, annee, mois, jour, heure, minute):
+        """ Modifie la date et l'horaire du repas"""
+        assert (isinstance(annee, int)), "L'année n'est pas un entier"
+        assert (isinstance(mois, int)), "Le mois n'est pas un entier"
+        assert (isinstance(jour, int)), "Le jour n'est pas un entier"
+        assert (isinstance(heure, int)), "L'heure n'est pas un entier"
+        assert (isinstance(minute, int)), "Les minutes n'est pas un entier"
+        self.date = datetime.datetime(annee, mois, jour, heure, minute)
+        return None
+
     def ajouter_recette(self, recette):
         """
-        Ajoute une recette à un repas
+        Ajoute une recette à un repas.
         """
         message_erreur = "il faut ajouter un element de la classe Recette"
         assert (isinstance(recette, Recette)), message_erreur
@@ -235,7 +255,7 @@ class Repas:
 
     def supprimer_recette(self, recette):
         """
-        Supprime une recette d'un repas
+        Supprime une recette d'un repas.
         """
         message_erreur = "il faut supprimer un element de la classe Recette"
         assert (isinstance(recette, Recette)), message_erreur
@@ -244,6 +264,7 @@ class Repas:
         return None
 
 class RepasEncoder(json.JSONEncoder):
+    """Permet de stocker un repas dans un fichier JSON"""
     #code d'après https://docs.python.org/fr/2.7/library/json.html
     def default(self, obj):
         if isinstance(obj, Repas):
@@ -274,6 +295,7 @@ if __name__ == "__main__":
         data = json.load(data_file)
 
     repas.supprimer_recette(R)
+    repas.set_date(2020, 1, 12, 0, 1)
     repas.afficher_repas
     repas.set_nb_personnes(24)
     repas.set_nb_personnes(23)
