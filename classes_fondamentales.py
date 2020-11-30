@@ -16,7 +16,6 @@ class Ingredient:
     - nom de type str
     - categorie de type str
     - quantite de type float
-
     """
 
     def __init__(self, nom0, cat0, quan0):
@@ -62,7 +61,8 @@ class Ingredient:
         """
         Returns a dictionnary corresponding to the ingredient.
         """
-        return {'Nom' : self.nom, 'Catégorie' : self.categorie, 'Quantité' : self.quantite}
+        return {'Nom' : self.nom, 'Categorie' : self.categorie,
+                'Quantite' : self.quantite, 'Ingredient' : True}
 
 
     @property
@@ -120,7 +120,7 @@ class Recette:
         for ingredient in self.liste_ingredients:
             liste_dict_ingredients.append(ingredient.dict_ingredient)
         dicti = {'Nom' : self.__nom, 'Categorie' : self.__categorie,
-                 'Liste ingredients' : liste_dict_ingredients}
+                 'Liste ingredients' : liste_dict_ingredients, 'Recette' : True}
         return dicti
 
     @property
@@ -177,6 +177,7 @@ class Recette:
         return None
 
 
+
 class Repas:
     """
     Represente un repas
@@ -188,7 +189,7 @@ class Repas:
 
     def __init__(self):
         """
-        Initialise un repas au moment de sa création par l'utilisateur. 
+        Initialise un repas au moment de sa création par l'utilisateur.
         Par défaut, le nombre de personne est 0, et la date est la date actuelle
         """
         self.liste_recettes = []
@@ -213,7 +214,7 @@ class Repas:
         for recette in self.liste_recettes:
             liste_dict_recettes.append(recette.dict_recette)
         dicti = {'Nombre de personnes' : self.nb_personnes, 'Liste recettes' : liste_dict_recettes,
-                 'Date et heure' : self.date.isoformat()}
+                 'Date et heure' : self.date.isoformat(), 'Repas' : True}
         return dicti
 
     @property
@@ -241,7 +242,28 @@ class Repas:
         assert (isinstance(jour, int)), "Le jour n'est pas un entier"
         assert (isinstance(heure, int)), "L'heure n'est pas un entier"
         assert (isinstance(minute, int)), "Les minutes n'est pas un entier"
-        self.date = datetime.datetime(annee, mois, jour, heure, minute)
+        try:
+            self.date = datetime.datetime(annee, mois, jour, heure, minute)
+        except ValueError as erreur:
+            print("Les nombres doivent repecter le format usuel de date et d'heure, ici :", erreur)
+        return None
+
+    def set_date_JSON(self, string):
+        """ Importe la date et l'horaire du repas"""
+        # self.date = datetime.fromisoformat(string)
+        # ça ne marche pas, peut-etre que ma version de Python est trop vieille
+        annee = int(string[0:4])
+        liste_indices = [(5, 7), (8, 10), (11, 13), (14, 16)]
+        liste_nombre = []
+        for couple in liste_indices:
+            indice1, indice2 = couple
+            if string[indice1] == 0:
+                nombre = int(string[(indice1+1):indice2])
+            else:
+                nombre = int(string[indice1:indice2])
+            liste_nombre.append(nombre)
+        mois, jour, heure, minute = liste_nombre
+        self.set_date(annee, mois, jour, heure, minute)
         return None
 
     def ajouter_recette(self, recette):
@@ -263,8 +285,11 @@ class Repas:
         self.liste_recettes.remove(recette)
         return None
 
+
 class RepasEncoder(json.JSONEncoder):
-    """Permet de stocker un repas dans un fichier JSON"""
+    """
+    Permet de stocker un repas dans un fichier JSON
+    """
     #code d'après https://docs.python.org/fr/2.7/library/json.html
     def default(self, obj):
         if isinstance(obj, Repas):
@@ -272,30 +297,83 @@ class RepasEncoder(json.JSONEncoder):
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
+def decoder_ingredient(dct):
+    """
+    assert (isinstance(dct, dict)), "La fonction prend en argument un dictionnaire"
+    Permet de décoder un ingredient d'après un dictionnaire
+    (format utilisé pour le stockage dans un fichier JSON)
+    """
+    if 'Ingredient' in dct:
+        ingredient = Ingredient(dct['Nom'], dct['Categorie'], dct['Quantite'])
+        return ingredient
+    print("Ce dictionnaire n'est pas un ingrédient")
+    return dct
+
+def decoder_recette(dct):
+    """
+    Permet de décoder une recette d'après un dictionnaire
+    (format utilisé pour le stockage dans un fichier JSON)
+    """
+    assert (isinstance(dct, dict)), "La fonction prend en argument un dictionnaire"
+    if 'Recette' in dct:
+        recette = Recette(dct['Nom'], dct['Categorie'])
+        for element in dct['Liste ingredients']:
+            ingredient = decoder_ingredient(element)
+            recette.ajouter_ingredient(ingredient)
+        return recette
+    print("Ce dictionnaire n'est pas une recette")
+    return dct
+
+def decoder_repas(dct):
+    """
+    Permet de décoder un repas d'après un dictionnaire
+    (format utilisé pour le stockage dans un fichier JSON)
+    """
+    assert (isinstance(dct, dict)), "La fonction prend en argument un dictionnaire"
+    if 'Repas' in dct:
+        repas = Repas()
+        repas.set_date_JSON(dct['Date et heure'])
+        repas.set_nb_personnes(dct['Nombre de personnes'])
+        for element in dct['Liste recettes']:
+            recette = decoder_recette(element)
+            repas.ajouter_recette(recette)
+        return repas
+    print("Ce dictionnaire n'est pas un repas")
+    return dct
+
+
 if __name__ == "__main__":
 #    #Test of the class Ingredient
     Lait = Ingredient("Lait", "Produit laitier", 2.)
     cacao = Ingredient("Cacao", "Divers", 1.)
     cafe = Ingredient("Café", "Divers", 1.)
-    R = Recette("Chocolat chaud", "boisson")
-    R.ajouter_ingredient(Lait)
-    R.ajouter_ingredient(cacao)
-    R.afficher_recette
-    R.supprimer_ingredient(cacao)
-    R.ajouter_ingredient(cafe)
-    R.nom("Café au lait")
-    R.afficher_recette
+    R1 = Recette("Chocolat chaud", "boisson")
     repas = Repas()
-    repas.ajouter_recette(R)
+    R1.ajouter_ingredient(Lait)
+    R1.ajouter_ingredient(cacao)
+    R1.afficher_recette
+    repas.ajouter_recette(R1)
+    repas.afficher_repas
+    R2 = Recette("Chocolat chaud", "boisson")
+    R2.ajouter_ingredient(Lait)
+    R2.ajouter_ingredient(cacao)
+    R2.supprimer_ingredient(cacao)
+    R2.ajouter_ingredient(cafe)
+    R2.nom("Café au lait")
+    R2.afficher_recette
+    repas.ajouter_recette(R2)
+    repas.set_date(2020, 1, 12, 0, 1)
     repas.afficher_repas
 
     with open("data_file.json", "w") as write_file:
         json.dump(repas, write_file, indent=2, cls=RepasEncoder)
     with open("data_file.json", "r") as data_file:
         data = json.load(data_file)
+    print("\nDécodage")
+    nouveau_repas = decoder_repas(data)
+    nouveau_repas.afficher_repas
 
-    repas.supprimer_recette(R)
-    repas.set_date(2020, 1, 12, 0, 1)
+    repas.supprimer_recette(R2)
     repas.afficher_repas
     repas.set_nb_personnes(24)
     repas.set_nb_personnes(23)
