@@ -109,7 +109,20 @@ class Recette:
         """
         Returns a string corresponding to the Python representation.
         """
-        return "Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ")"
+        string = "Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ") : " + "\n"
+        for ingredient in self.liste_ingredients:
+            string += ingredient.__repr__ + "\n"
+        return string
+
+    @property
+    def list_repr(self):
+        """
+        Returns a string corresponding to the Python representation.
+        """
+        liste = ["Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ")"]
+        for ingredient in self.liste_ingredients:
+            liste.append(ingredient.__repr__)
+        return liste
 
     @property
     def dict_recette(self):
@@ -138,9 +151,7 @@ class Recette:
         """
         Affiche les ingrédients de la recette
         """
-        print(self.__repr__ + " : ")
-        for ingredient in self.liste_ingredients:
-            print(ingredient.__repr__)
+        print(self.__repr__)
         return None
 
     #@nom.setter
@@ -202,7 +213,20 @@ class Repas:
         """
         Returns a string corresponding to the Python representation.
         """
-        return "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")
+        string = "\n" + "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")+" : \n \n"
+        for recette in self.liste_recettes:
+            string += "" + recette.__repr__ + "\n"
+        return string
+
+    @property
+    def list_repr(self):
+        """
+        Returns a string corresponding to the Python representation.
+        """
+        liste = ["Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")]
+        for recette in self.liste_recettes:
+            liste.append(recette.list_repr)
+        return liste
 
     @property
     def dict_repas(self):
@@ -222,10 +246,7 @@ class Repas:
         """
         Affiche les recettes du repas.
         """
-        print("\n \n" + self.__repr__ + " : ")
-        for recette in self.liste_recettes:
-            print("")
-            recette.afficher_recette
+        print(self.__repr__)
         return None
 
     #@nb_personnes.setter
@@ -286,6 +307,17 @@ class Repas:
         return None
 
 
+class RecetteEncoder(json.JSONEncoder):
+    """
+    Permet de stocker une recette dans un fichier JSON
+    """
+    #code d'après https://docs.python.org/fr/2.7/library/json.html
+    def default(self, obj):
+        if isinstance(obj, Recette):
+            return obj.dict_recette
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
+
 class RepasEncoder(json.JSONEncoder):
     """
     Permet de stocker un repas dans un fichier JSON
@@ -321,7 +353,7 @@ def decoder_recette(dct):
             ingredient = decoder_ingredient(element)
             recette.ajouter_ingredient(ingredient)
         return recette
-    print("Ce dictionnaire n'est pas une recette")
+    print("Ce dictionnaire ne représente pas une recette")
     return dct
 
 def decoder_repas(dct):
@@ -338,7 +370,7 @@ def decoder_repas(dct):
             recette = decoder_recette(element)
             repas.ajouter_recette(recette)
         return repas
-    print("Ce dictionnaire n'est pas un repas")
+    print("Ce dictionnaire ne représente pas un repas")
     return dct
 
 
@@ -347,13 +379,11 @@ if __name__ == "__main__":
     Lait = Ingredient("Lait", "Produit laitier", 2.)
     cacao = Ingredient("Cacao", "Divers", 1.)
     cafe = Ingredient("Café", "Divers", 1.)
+    
     R1 = Recette("Chocolat chaud", "boisson")
-    repas = Repas()
     R1.ajouter_ingredient(Lait)
     R1.ajouter_ingredient(cacao)
     R1.afficher_recette
-    repas.ajouter_recette(R1)
-    repas.afficher_repas
     R2 = Recette("Chocolat chaud", "boisson")
     R2.ajouter_ingredient(Lait)
     R2.ajouter_ingredient(cacao)
@@ -361,10 +391,20 @@ if __name__ == "__main__":
     R2.ajouter_ingredient(cafe)
     R2.nom("Café au lait")
     R2.afficher_recette
+    liste_R2 = R2.list_repr
+    
+    repas = Repas()
+    repas.ajouter_recette(R1)
+    repas.afficher_repas
     repas.ajouter_recette(R2)
     repas.set_date(2020, 1, 12, 0, 1)
     repas.afficher_repas
-
+    liste_repas = repas.list_repr
+    
+    with open("data_file_recettes.json", "w") as write_file:
+        json.dump(R2, write_file, indent=2, cls=RecetteEncoder)
+    with open("data_file_recettes.json", "r") as data_file:
+        data_recettes = json.load(data_file)
     with open("data_file.json", "w") as write_file:
         json.dump(repas, write_file, indent=2, cls=RepasEncoder)
     with open("data_file.json", "r") as data_file:
