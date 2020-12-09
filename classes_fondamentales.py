@@ -9,11 +9,12 @@ import datetime
 # datetime(year, month, day, hour, minute, second, microsecond)
 import json
 
+
 # On pourrait faire une dataclass
 class Ingredient:
     """
     Représente un ingredient
-    - nom de type str
+    - nom de type str (/!\ sensible à la casse => Poire != poire)
     - categorie de type str
     - quantite de type float
     """
@@ -26,6 +27,11 @@ class Ingredient:
         self.categorie = cat0
         #va surement etre changé pour faire appel à la base de donnée
         self.quantite = quan0
+
+    def clone(self):
+        """ Copie profonde de l'ingrédient """
+        nouveau = Ingredient(self.nom, self.categorie, self.quantite)
+        return nouveau
 
     @property
     def get_nom(self):
@@ -67,13 +73,27 @@ class Ingredient:
 
     @property
     def __eq__(self, other):
-        """Returns True if self and other are equal"""
-        return self.nom == other.nom and self.quantite == other.quantite
+        """
+        Renvoie True si self et other sont égaux.
+        Attention : on ne vérifie pas la quantité !
+        """
+        assert(isinstance(other, Ingredient)), "Il faut comparer deux ingrédients"
+        booleen = (self.nom == other.nom and self.categorie == other.categorie)
+        print("coucou")
+        print("booleen =", booleen)
+        return booleen
 
     @property
     def __ne__(self, other):
         """Returns True if self and other are different"""
         return not self.__eq__(other)
+
+    def __iadd__(self, autre_ingredient):
+        assert(self.nom == autre_ingredient.nom), "Les ingrédients ne sont pas les mêmes"
+        self.quantite += autre_ingredient.quantite
+        return self
+
+
 
 class Recette:
     """
@@ -374,12 +394,68 @@ def decoder_repas(dct):
     return dct
 
 
+def generer_courses(menu):
+    """
+    menu est une liste de repas.
+    On génère un dictionnaire de dictionnaires
+    dict_principal = {
+    "Fruits" : {"Poires" : 3, "Pommes" : 5}
+    "Féculents" : {"Pommes de terre" : 20, "Pates" : 500}
+    }
+    """
+    dict_principal = {}
+    for repas in menu:
+        assert(isinstance(repas, Repas)), "Un menu doit etre constitué de repas"
+        for recette in repas.liste_recettes:
+            for ingredient in recette.liste_ingredients:
+                cat = ingredient.get_categorie
+                nom = ingredient.get_nom
+                quantite = ingredient.quantite
+                if cat in dict_principal:
+                    dict_secondaire = dict_principal[cat]
+                    if nom in dict_secondaire:
+                        dict_secondaire[nom] += quantite
+                    else:
+                        dict_secondaire[nom] = quantite
+                else:
+                    dict_principal[cat] = {nom : quantite}
+    return dict_principal
+
+def afficher_courses(dict_principal):
+    """
+    menu est une liste de repas.
+    On génère un dictionnaire de dictionnaires
+    dict_principal = {
+    "Fruits" : {"Poires" : 3, "Pommes" : 5}
+    "Féculents" : {"Pommes de terre" : }
+    }
+    """
+    INDENTATION = "     "
+    print("Liste des courses")
+    for cat in dict_principal.keys():
+        print(cat)
+        dict_secondaire = dict_principal[cat]
+        for nom in dict_secondaire:
+            quantite = dict_secondaire[nom]
+            print(INDENTATION  + str(nom) + " : " + str(quantite))
+    return None
+
 if __name__ == "__main__":
 #    #Test of the class Ingredient
-    Lait = Ingredient("Lait", "Produit laitier", 2.)
+    Lait = Ingredient("Lait", "Produits laitiers", 2.)
     cacao = Ingredient("Cacao", "Divers", 1.)
     cafe = Ingredient("Café", "Divers", 1.)
-    
+    cacao2 = Ingredient("Cacao", "Divers", 2.)
+
+    # Grand mystère mais bon on se débrouille
+    print(cacao.categorie == cacao2.categorie)
+    print(cacao.nom == cacao2.nom)
+    print(cacao.nom == cacao2.nom and cacao.categorie == cacao2.categorie)
+    print(cacao == cacao2)
+
+
+    cacao2 += cacao
+    print(cacao2.__repr__)
     R1 = Recette("Chocolat chaud", "boisson")
     R1.ajouter_ingredient(Lait)
     R1.ajouter_ingredient(cacao)
@@ -392,15 +468,15 @@ if __name__ == "__main__":
     R2.nom("Café au lait")
     R2.afficher_recette
     liste_R2 = R2.list_repr
-    
+
     repas = Repas()
     repas.ajouter_recette(R1)
     repas.afficher_repas
     repas.ajouter_recette(R2)
-    repas.set_date(2020, 1, 12, 0, 1)
+    repas.set_date(2020, 1, 12, 16, 30)
     repas.afficher_repas
     liste_repas = repas.list_repr
-    
+
     with open("data_file_recettes.json", "w") as write_file:
         json.dump(R2, write_file, indent=2, cls=RecetteEncoder)
     with open("data_file_recettes.json", "r") as data_file:
@@ -412,9 +488,12 @@ if __name__ == "__main__":
     print("\nDécodage")
     nouveau_repas = decoder_repas(data)
     nouveau_repas.afficher_repas
-
-    repas.supprimer_recette(R2)
-    repas.afficher_repas
-    repas.set_nb_personnes(24)
-    repas.set_nb_personnes(23)
-    print(repas.nb_personnes)
+    
+    dicti = generer_courses([nouveau_repas])
+    afficher_courses(dicti)
+    
+#    repas.supprimer_recette(R2)
+#    repas.afficher_repas
+#    repas.set_nb_personnes(24)
+#    repas.set_nb_personnes(23)
+#    print(repas.nb_personnes)
