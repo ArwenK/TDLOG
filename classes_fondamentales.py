@@ -8,7 +8,8 @@ Created on Fri Nov  6 15:33:56 2020
 import datetime
 # datetime(year, month, day, hour, minute, second, microsecond)
 import json
-
+#import sqlalchemy
+#print (sqlalchemy.__version__)
 
 # On pourrait faire une dataclass
 class Ingredient:
@@ -59,7 +60,7 @@ class Ingredient:
         """
         Returns a string corresponding to the Python representation.
         """
-        string = str(self.nom) + ", " + str(self.categorie) +", " + str(self.quantite)
+        string = str(self.nom) + ", " + str(self.categorie) + ", " + str(self.quantite)
         return string
 
     @property
@@ -71,7 +72,6 @@ class Ingredient:
                 'Quantite' : self.quantite, 'Ingredient' : True}
 
 
-    @property
     def __eq__(self, other):
         """
         Renvoie True si self et other sont égaux.
@@ -79,8 +79,6 @@ class Ingredient:
         """
         assert(isinstance(other, Ingredient)), "Il faut comparer deux ingrédients"
         booleen = (self.nom == other.nom and self.categorie == other.categorie)
-        print("coucou")
-        print("booleen =", booleen)
         return booleen
 
     @property
@@ -89,7 +87,7 @@ class Ingredient:
         return not self.__eq__(other)
 
     def __iadd__(self, autre_ingredient):
-        assert(self.nom == autre_ingredient.nom), "Les ingrédients ne sont pas les mêmes"
+        assert(self == autre_ingredient), "Les ingrédients ne sont pas les mêmes"
         self.quantite += autre_ingredient.quantite
         return self
 
@@ -124,25 +122,30 @@ class Recette:
         """
         return self.__categorie
 
+
+    def to_string(self, back="\n"):
+        """
+        Returns a string corresponding to the Python representation.
+        """
+        string = "Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ") : " + back
+        for ingredient in self.liste_ingredients:
+            string += ingredient.__repr__ + back
+        return string
+
     @property
     def __repr__(self):
         """
         Returns a string corresponding to the Python representation.
         """
-        string = "Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ") : " + "\n"
-        for ingredient in self.liste_ingredients:
-            string += ingredient.__repr__ + "\n"
+        string = self.to_string("\n")
         return string
 
     @property
-    def list_repr(self):
+    def html_repr(self):
         """
-        Returns a string corresponding to the Python representation.
+        Returns a string corresponding to the html representation.
         """
-        liste = ["Recette(" + str(self.__nom) + ", " + str(self.__categorie) + ")"]
-        for ingredient in self.liste_ingredients:
-            liste.append(ingredient.__repr__)
-        return liste
+        return self.to_string("<br>")
 
     @property
     def dict_recette(self):
@@ -228,25 +231,29 @@ class Repas:
         self.date = datetime.datetime.now()
         # date actuelle
 
+
+    def to_string(self, back="\n"):
+        """
+        Returns a string corresponding to the Python representation.
+        """
+        string = back + "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")+" :"+ back + back
+        for recette in self.liste_recettes:
+            string += "" + recette.to_string(back) + back
+        return string
+
     @property
     def __repr__(self):
         """
         Returns a string corresponding to the Python representation.
         """
-        string = "\n" + "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")+" : \n \n"
-        for recette in self.liste_recettes:
-            string += "" + recette.__repr__ + "\n"
-        return string
+        return self.to_string("\n")
 
     @property
-    def list_repr(self):
+    def html_repr(self):
         """
         Returns a string corresponding to the Python representation.
         """
-        liste = ["Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")]
-        for recette in self.liste_recettes:
-            liste.append(recette.list_repr)
-        return liste
+        return self.to_string("<br>")
 
     @property
     def dict_repas(self):
@@ -421,44 +428,61 @@ def generer_courses(menu):
                     dict_principal[cat] = {nom : quantite}
     return dict_principal
 
-def afficher_courses(dict_principal):
+def to_string_courses(dict_principal, back="\n"):
     """
-    menu est une liste de repas.
-    On génère un dictionnaire de dictionnaires
     dict_principal = {
     "Fruits" : {"Poires" : 3, "Pommes" : 5}
     "Féculents" : {"Pommes de terre" : }
     }
+    On convertit le dictionnaire en string
+    On renvoit string
     """
     INDENTATION = "     "
-    print("Liste des courses")
+    string = "Liste des courses" + back
     for cat in dict_principal.keys():
-        print(cat)
+        string += cat + back
         dict_secondaire = dict_principal[cat]
         for nom in dict_secondaire:
             quantite = dict_secondaire[nom]
-            print(INDENTATION  + str(nom) + " : " + str(quantite))
+            string += INDENTATION  + str(nom) + " : " + str(quantite) + back
+    return string
+
+def afficher_courses(dict_principal):
+    """
+    dict_principal = {
+    "Fruits" : {"Poires" : 3, "Pommes" : 5}
+    "Féculents" : {"Pommes de terre" : }
+    }
+    On affiche le dictionnaire dans la console Python.
+    """
+    print(to_string_courses(dict_principal, "\n"))
     return None
 
+
+def html_courses(dict_principal):
+    """
+    dict_principal = {
+    "Fruits" : {"Poires" : 3, "Pommes" : 5}
+    "Féculents" : {"Pommes de terre" : }
+    }
+    On revoit une string qui permet d'afficher le dictionnaire au format html.
+    """
+    return to_string_courses(dict_principal, "<br>")
+
 if __name__ == "__main__":
-#    #Test of the class Ingredient
+    #Test de la classe Ingredient
     Lait = Ingredient("Lait", "Produits laitiers", 2.)
     cacao = Ingredient("Cacao", "Divers", 1.)
     cafe = Ingredient("Café", "Divers", 1.)
     cacao2 = Ingredient("Cacao", "Divers", 2.)
-
-    # Grand mystère mais bon on se débrouille
-    print(cacao.categorie == cacao2.categorie)
-    print(cacao.nom == cacao2.nom)
-    print(cacao.nom == cacao2.nom and cacao.categorie == cacao2.categorie)
-    print(cacao == cacao2)
-
-
     cacao2 += cacao
     print(cacao2.__repr__)
+
+    #Test de la classe Recette
     R1 = Recette("Chocolat chaud", "boisson")
     R1.ajouter_ingredient(Lait)
     R1.ajouter_ingredient(cacao)
+    print(R1.html_repr)
     R1.afficher_recette
     R2 = Recette("Chocolat chaud", "boisson")
     R2.ajouter_ingredient(Lait)
@@ -467,16 +491,18 @@ if __name__ == "__main__":
     R2.ajouter_ingredient(cafe)
     R2.nom("Café au lait")
     R2.afficher_recette
-    liste_R2 = R2.list_repr
 
+    #Test de la classe Repas
     repas = Repas()
     repas.ajouter_recette(R1)
     repas.afficher_repas
     repas.ajouter_recette(R2)
     repas.set_date(2020, 1, 12, 16, 30)
     repas.afficher_repas
-    liste_repas = repas.list_repr
+    print(repas.html_repr)
 
+    #Fonctionnalités JSON
+    test = json.dumps(R2, indent=2, cls=RecetteEncoder)
     with open("data_file_recettes.json", "w") as write_file:
         json.dump(R2, write_file, indent=2, cls=RecetteEncoder)
     with open("data_file_recettes.json", "r") as data_file:
@@ -488,12 +514,15 @@ if __name__ == "__main__":
     print("\nDécodage")
     nouveau_repas = decoder_repas(data)
     nouveau_repas.afficher_repas
-    
+
+    # Liste de course
     dicti = generer_courses([nouveau_repas])
     afficher_courses(dicti)
-    
-#    repas.supprimer_recette(R2)
-#    repas.afficher_repas
-#    repas.set_nb_personnes(24)
-#    repas.set_nb_personnes(23)
-#    print(repas.nb_personnes)
+    print(html_courses(dicti))
+
+    #Suite test de la classe Repas
+    repas.supprimer_recette(R2)
+    repas.afficher_repas
+    repas.set_nb_personnes(24)
+    repas.set_nb_personnes(23)
+    print(repas.nb_personnes)
