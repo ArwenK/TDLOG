@@ -1,0 +1,19 @@
+{
+  "Nom": "Caf\u00e9 au lait",
+  "Categorie": "boisson",
+  "Liste ingredients": [
+    {
+      "Nom": "Lait",
+      "Categorie": "Produits laitiers",
+      "Quantite": 2.0,
+      "Ingredient": true
+    },
+    {
+      "Nom": "Caf\u00e9",
+      "Categorie": "Divers",
+      "Quantite": 10.0,
+      "Ingredient": true
+    }
+  ],
+  "Recette": true
+}
