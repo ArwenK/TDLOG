@@ -8,17 +8,32 @@ Created on Fri Nov  6 15:33:56 2020
 import datetime
 # datetime(year, month, day, hour, minute, second, microsecond)
 import json
-#import sqlalchemy
-#print (sqlalchemy.__version__)
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+tags = db.Table(
+    'tags',
+    db.Column('recette_id', db.Integer, db.ForeignKey('recette.id'), primary_key=True),
+    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredient.id'), primary_key=True))
+
 
 # On pourrait faire une dataclass
-class Ingredient:
+class Ingredient(db.Model):
     """
     Représente un ingredient
     - nom de type str (/!\ sensible à la casse => Poire != poire)
     - categorie de type str
     - quantite de type float
     """
+    id = db.Column(db.Integer, primary_key=True)
+    nom = db.Column(db.String(80), nullable=False)
+    categorie = db.Column(db.String(80), nullable=False)
+    quantite = db.Column(db.Float, nullable=True)
 
     def __init__(self, nom0, cat0, quan0):
         assert (isinstance(nom0, str)), "nom n'est pas de type str"
@@ -60,7 +75,7 @@ class Ingredient:
         """
         Returns a string corresponding to the Python representation.
         """
-        string = str(self.nom) + ", " + str(self.categorie) + ", " + str(self.quantite)
+        string = str(self.nom) #+ ", " + str(self.categorie) + ", " + str(self.quantite)
         return string
 
     @property
@@ -72,41 +87,48 @@ class Ingredient:
                 'Quantite' : self.quantite, 'Ingredient' : True}
 
 
-    def __eq__(self, other):
-        """
-        Renvoie True si self et other sont égaux.
-        Attention : on ne vérifie pas la quantité !
-        """
-        assert(isinstance(other, Ingredient)), "Il faut comparer deux ingrédients"
-        booleen = (self.nom == other.nom and self.categorie == other.categorie)
-        return booleen
-
-    @property
-    def __ne__(self, other):
-        """Returns True if self and other are different"""
-        return not self.__eq__(other)
+#    def __eq__(self, other):
+#        """
+#        Renvoie True si self et other sont égaux.
+#        Attention : on ne vérifie pas la quantité !
+#        """
+#        assert(isinstance(other, Ingredient)), "Il faut comparer deux ingrédients"
+#        booleen = (self.nom == other.nom and self.categorie == other.categorie and self.categorie == other.categorie)
+#        return booleen
+#
+#    @property
+#    def __ne__(self, other):
+#        """Returns True if self and other are different"""
+#        return not self.__eq__(other)
 
     def __iadd__(self, autre_ingredient):
-        assert(self == autre_ingredient), "Les ingrédients ne sont pas les mêmes"
+        #assert(self == autre_ingredient), "Les ingrédients ne sont pas les mêmes"
         self.quantite += autre_ingredient.quantite
         return self
+    
 
 
 
-class Recette:
+class Recette(db.Model):
     """
     Represents une recette
     - nom de type str
     - categorie de type str
     - une liste d'ingredient
     """
+    id = db.Column(db.Integer, primary_key=True)
+    __nom = db.Column(db.String(80), nullable=False)
+    __categorie =  db.Column(db.String(80), nullable=False)
+    liste_ingredients = db.relationship(
+        'Ingredient', secondary=tags, lazy='subquery',
+        backref=db.backref('recette', lazy=True))
 
-    def __init__(self, nom0, cat0):
+    def __init__(self, nom0, cat0, ingredients):
         assert (isinstance(nom0, str)), "nom n'est pas de type str"
         assert (isinstance(cat0, str)), "categorie n'est pas de type str"
         self.__nom = nom0
         self.__categorie = cat0
-        self.liste_ingredients = []
+        self.liste_ingredients = ingredients
 
     @property
     def get_nom(self):
@@ -160,16 +182,6 @@ class Recette:
         return dicti
 
     @property
-    def __eq__(self, other):
-        """Returns True if self and other are equal"""
-        return self.__nom == other.get_nom
-
-    @property
-    def __ne__(self, other):
-        """Returns True if self and other are different"""
-        return not self.__eq__(other)
-
-    @property
     def afficher_recette(self):
         """
         Affiche les ingrédients de la recette
@@ -220,6 +232,12 @@ class Repas:
     - une date de type datetime
     - une liste de recettes liste_recettes
     """
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime)
+    nb_personnes = db.Column(db.Integer)
+#    liste_recettes = db.relationship(
+#        'Ingredient', secondary=tags, lazy='subquery',
+#        backref=db.backref('recette', lazy=True))
 
     def __init__(self):
         """
@@ -236,7 +254,7 @@ class Repas:
         """
         Returns a string corresponding to the Python representation.
         """
-        string = back + "Repas du " + self.date.strftime("%m/%d/%Y à %H:%M:%S")+" :"+ back + back
+        string = back + "Repas du " + self.date.strftime("%d/%m/%Y à %H:%M:%S")+" :"+ back + back
         for recette in self.liste_recettes:
             string += "" + recette.to_string(back) + back
         return string
@@ -375,7 +393,7 @@ def decoder_recette(dct):
     """
     assert (isinstance(dct, dict)), "La fonction prend en argument un dictionnaire"
     if 'Recette' in dct:
-        recette = Recette(dct['Nom'], dct['Categorie'])
+        recette = Recette(dct['Nom'], dct['Categorie'], [])
         for element in dct['Liste ingredients']:
             ingredient = decoder_ingredient(element)
             recette.ajouter_ingredient(ingredient)
@@ -476,15 +494,44 @@ if __name__ == "__main__":
     cafe = Ingredient("Café", "Divers", 1.)
     cacao2 = Ingredient("Cacao", "Divers", 2.)
     cacao2 += cacao
-    print(cacao2.__repr__)
+    cacao3 = cacao2.clone()
+    #print(cacao3.__repr__)
+    cacao2+= cacao
+    #print(cacao3.__repr__)
+     # init the db
+    db.create_all()
+    for ingredient in (cacao, cafe, cacao2):
+        db.session.add(ingredient)
+
+    cafe = Ingredient("Café", "Divers", 10.)
+    # list all the ingredients
+    for ingredient in Ingredient.query.all():
+        print(ingredient.__repr__)
+        
+    salade = Ingredient('salade', "Légumes", 1.)
+    tomate = Ingredient('tomate', "Légumes", 1.)
+    riz = Ingredient('riz', "Féculents", 100.)
+    beurre = Ingredient('beurre', "Produits laitiers", 2.)
+    for ingredient in (salade, tomate, riz, beurre):
+        db.session.add(ingredient)
+        
+#    # create some recipes
+    Salade_composee =Recette('salade_composée', "Entrée", [salade, tomate])
+    db.session.add(Salade_composee)
+    db.session.add(Recette('salade au beurre', "Entrée", [salade, beurre]))
+    db.session.add(Recette('bol de riz', "Plat", [riz, beurre]))
+#
+    # list all the recipes
+    for recette in Recette.query.all():
+        print(recette.__repr__)
 
     #Test de la classe Recette
-    R1 = Recette("Chocolat chaud", "boisson")
+    R1 = Recette("Chocolat chaud", "boisson", [])
     R1.ajouter_ingredient(Lait)
     R1.ajouter_ingredient(cacao)
     print(R1.html_repr)
     R1.afficher_recette
-    R2 = Recette("Chocolat chaud", "boisson")
+    R2 = Recette("Chocolat chaud", "boisson", [])
     R2.ajouter_ingredient(Lait)
     R2.ajouter_ingredient(cacao)
     R2.supprimer_ingredient(cacao)
@@ -526,3 +573,28 @@ if __name__ == "__main__":
     repas.set_nb_personnes(24)
     repas.set_nb_personnes(23)
     print(repas.nb_personnes)
+    riz_c = Ingredient("Riz complet", "féculents", 100.)
+    emmental = Ingredient("Emmental", "Produits laitiers", 100.)
+    olives = Ingredient("Olives", "Conserves", 100.)
+    oeuf = Ingredient("Oeufs", "Protéines", 1.)
+    champignons = Ingredient("Champignons", "légumes", 150.)
+    Riz_complet = Recette("Riz complet", "plat", [])
+    Riz_complet.ajouter_ingredient(riz_c)
+    Riz_complet.ajouter_ingredient(emmental)
+    Riz_complet.ajouter_ingredient(olives)
+    Riz_complet.ajouter_ingredient(oeuf)
+    Riz_complet.ajouter_ingredient(champignons)
+    mercredi_soir = Repas()
+    mercredi_soir.ajouter_recette(Riz_complet)
+    mercredi_soir.set_nb_personnes(3)
+    mercredi_soir.set_date(2020, 12, 16, 20, 00)
+    mercredi_soir.afficher_repas
+    
+    jeudi_soir = Repas()
+    jeudi_soir.ajouter_recette(Riz_complet)
+    jeudi_soir.set_nb_personnes(2)
+    jeudi_soir.set_date(2020, 12, 17, 20, 00)
+    jeudi_soir.afficher_repas
+    dicti = generer_courses([mercredi_soir, jeudi_soir])
+    afficher_courses(dicti)
+
