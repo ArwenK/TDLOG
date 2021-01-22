@@ -1,0 +1,47 @@
+{
+  "Nombre de personnes": 0,
+  "Liste recettes": [
+    {
+      "Nom": "Chocolat chaud",
+      "Nombre": "2",
+      "Categorie": "boisson",
+      "Liste ingredients": [
+        {
+          "Nom": "Lait",
+          "Categorie": "Produits laitiers",
+          "Quantite": 2.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "Cacao",
+          "Categorie": "Divers",
+          "Quantite": 1.0,
+          "Ingredient": true
+        }
+      ],
+      "Recette": true
+    },
+    {
+      "Nom": "Caf\u00e9 au lait",
+      "Nombre": "2",
+      "Categorie": "boisson",
+      "Liste ingredients": [
+        {
+          "Nom": "Lait",
+          "Categorie": "Produits laitiers",
+          "Quantite": 2.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "Caf\u00e9",
+          "Categorie": "Divers",
+          "Quantite": 10.0,
+          "Ingredient": true
+        }
+      ],
+      "Recette": true
+    }
+  ],
+  "Date et heure": "2020-01-12T16:30:00",
+  "Repas": true
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ajouter une recette</title>
+  <meta name="description" content="website description" />
+  <meta name="keywords" content="website keywords, website keywords" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css') }}" />
+  <script type=text/javascript src="{{url_for('static', filename='js/main9.js') }}"></script>
+</head>
+
+<body>
+  <div id="main">
+    <div id="header">
+      <div id="logo">
+        <div id="logo_text">
+          <!-- class="logo_colour", allows you to change the colour of the text -->
+          <h1>
+            <a href="{{ url_for('index') }}">Aide
+              <span class="logo_colour">aux courses</span>
+            </a>
+          </h1>
+        </div>
+      </div>
+      <div id="menubar">
+        <ul id="menu">
+          <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
+          <li>
+            <a href="{{ url_for('index') }}">Accueil</a>
+          </li>
+          <li class="selected">
+            <a href="{{ url_for('recettes') }}">Recettes</a>
+          </li>
+          <li>
+            <a href="{{ url_for('liste') }}">Liste de courses</a>
+          </li>
+          <li>
+            <a href="{{ url_for('planning') }}">Planning des menus</a>
+          </li>
+          <li>
+            <a href="{{ url_for('login') }}">Se connecter</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div id="content_header">
+    </div>
+    <div id="site_content">
+      <div id="content">
+        <!-- insert the page content here -->
+        <h2>Ajouter une nouvelle recette :</h2>
+        <form action="#" method="post"  id="myForm">
+          <div class="form_settings">
+            <p>
+              <span><h4>Nom :</h4></span>
+              <input type="text" name="name_recipe" value="" placeholder="Nom de la recette" required />
+            </p>
+            <p>
+              <span><h4>Catégorie :</h4></span>
+              <select name="category_recipe">
+                <option value="1">Entrée</option>
+                <option value="2">Plat</option>
+                <option value="3">Dessert</option>
+                <option value="4">Goûter</option>
+                <option value="5">Boisson</option>
+                <option value="6">Autres</option>
+              </select>
+            </p>
+            <p>
+              <span><h4>Nombre de personnes :</h4></span>
+              <input type="number" name="nb_people" value="" placeholder="Nombre de personnes" required />
+            </p>
+            <p>
+              <span><h4> Ingrédients :</h4> </span>
+              <p>Nom :
+                <INPUT type="text" name="name_ingredient" value="" placeholder="Nom de l'ingrédient..." required>
+                <br>Catégorie :
+                <select id="category_ingredient" name="category_ingredient">
+                  <option value="1">Viandes, poissons, œufs</option>
+                  <option value="2">Produits laitiers</option>
+                  <option value="3">Matières grasses</option>
+                  <option value="4">Légumes et fruits</option>
+                  <option value="5">Céréales et dérivés – légumineuses</option>
+                  <option value="6">Sucres et produits sucrés</option>
+                  <option value="7">Boissons</option>
+                  <option value="8">Condiments</option>
+                </select>
+                <br>Quantité :
+                <INPUT type="number" name="quantity" value="" placeholder="Quantité" required>
+          </div>
+          <p>
+            <INPUT class="submit" type="button" Value="Ajouter" onClick="Ajouter(this.form)">
+            <INPUT class="submit" type="button" Value="Insérer" onClick="Inserer(this.form)">
+          </p>
+          <br>
+          <SELECT  name="liste" size=3 onClick="alert('Nom : '+this.options[this.selectedIndex].text+'\n'+'Quantité : ' + this.options[this.selectedIndex].value)">
+          </SELECT>
+          <br>
+          Sélectionnez une ligne de la liste pour voir le détail
+          <br>
+          <br>
+          <p>
+            <INPUT class="submit" type="button" value="Supprimer la sélection" onClick="Supprimer(this.form.liste)">
+            <INPUT class="submit" type="button" value="Supprimer tout" onClick="SupprimerTout(this.form.liste)">
+          </p>
+          </p>
+          </p>
+          <p>
+            <input class="submit" type="reset" name="reset" value="Effacer" />
+            <input class="submit" type="submit" name="contact_submitted" value="Soumettre" />
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="content_footer">
+  </div>
+  <div id="footer">
+    <p>
+      <a href="{{ url_for('index') }}">Accueil</a>|
+      <a href="{{ url_for('recettes') }}">Recettes</a>|
+      <a href="{{ url_for('planning') }}">Planning des menus</a>|
+      <a href="{{ url_for('liste') }}">Liste de courses</a>|
+      <a href="{{ url_for('login') }}">Se connecter</a>
+    </p>
+  </div>
+  </div>
+</body>
+
+</html>

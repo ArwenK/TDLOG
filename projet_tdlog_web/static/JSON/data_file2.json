@@ -1,0 +1,133 @@
+{
+  "Nombre de personnes": 0,
+  "Liste recettes": [
+    {
+      "Nom": "Salade endives",
+      "Nombre": "4",
+      "Categorie": "Entr\u00e9e",
+      "Liste ingredients": [
+        {
+          "Nom": "lardons",
+          "Categorie": "Viandes, poissons, \u0153ufs",
+          "Quantite": 100.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "endives",
+          "Categorie": "L\u00e9gumes et fruits",
+          "Quantite": 4.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "noix",
+          "Categorie": "C\u00e9r\u00e9ales et d\u00e9riv\u00e9s \u2013 l\u00e9gumineuses",
+          "Quantite": 65.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "fromage",
+          "Categorie": "Produits laitiers",
+          "Quantite": 100.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "pommes",
+          "Categorie": "L\u00e9gumes et fruits",
+          "Quantite": 100.0,
+          "Ingredient": true
+        }
+      ],
+      "Recette": true
+    },
+    {
+      "Nom": "Fondant au chocolat",
+      "Nombre": "4",
+      "Categorie": "Dessert",
+      "Liste ingredients": [
+        {
+          "Nom": "chocolat",
+          "Categorie": "Sucres et produits sucr\u00e9s",
+          "Quantite": 200.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "sucre",
+          "Categorie": "Sucres et produits sucr\u00e9s",
+          "Quantite": 125.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "oeufs",
+          "Categorie": "Viandes, poissons, \u0153ufs",
+          "Quantite": 3.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "beurre",
+          "Categorie": "Mati\u00e8res grasses",
+          "Quantite": 125.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "lait",
+          "Categorie": "Produits laitiers",
+          "Quantite": 10.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "farine",
+          "Categorie": "C\u00e9r\u00e9ales et d\u00e9riv\u00e9s \u2013 l\u00e9gumineuses",
+          "Quantite": 50.0,
+          "Ingredient": true
+        }
+      ],
+      "Recette": true
+    },
+    {
+      "Nom": "Quiche lorraine",
+      "Nombre": "4",
+      "Categorie": "Plat",
+      "Liste ingredients": [
+        {
+          "Nom": "oeufs",
+          "Categorie": "Viandes, poissons, \u0153ufs",
+          "Quantite": 3.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "cr\u00e8me fraiche",
+          "Categorie": "Produits laitiers",
+          "Quantite": 200.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "beurre",
+          "Categorie": "Mati\u00e8res grasses",
+          "Quantite": 75.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "farine",
+          "Categorie": "C\u00e9r\u00e9ales et d\u00e9riv\u00e9s \u2013 l\u00e9gumineuses",
+          "Quantite": 150.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "lardons",
+          "Categorie": "Viandes, poissons, \u0153ufs",
+          "Quantite": 150.0,
+          "Ingredient": true
+        },
+        {
+          "Nom": "fromage",
+          "Categorie": "Produits laitiers",
+          "Quantite": 100.0,
+          "Ingredient": true
+        }
+      ],
+      "Recette": true
+    }
+  ],
+  "Date et heure": "2020-01-12T12:30:00",
+  "Repas": true
+}
